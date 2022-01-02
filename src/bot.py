@@ -33,6 +33,8 @@ class MyBot(Cog):
         Send a welcoming message in the system channel.
 
         If there is no system channel, it picks the first channel available (if there is one).
+
+        The bot need the permission "members" for this to work.
         """
         guild = member.guild
         channel = guild.system_channel
