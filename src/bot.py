@@ -2,7 +2,7 @@
 
 It defines all the basic behaviour of the bot.
 """
-import os
+from typing import Optional
 
 import discord
 from discord.ext.commands import Cog, Bot, Context, command, CommandError
@@ -28,6 +28,23 @@ class MyBot(Cog):
             print(f'Connected to {guild.name}')
 
     @Cog.listener()
+    async def on_member_join(self, member: Member):
+        """Called when a new member join a guild.
+        Send a welcoming message in the system channel.
+
+        If there is no system channel, it picks the first channel available (if there is one).
+        """
+        guild = member.guild
+        channel = guild.system_channel
+        if channel is None:
+            if len(guild.text_channels) == 0:
+                return  # There is no channel in the guild, we don't show any message
+
+            channel = guild.text_channels[0]  # No system channel, we pick the first channel in the list
+
+        await channel.send('Hello you!')
+
+    @Cog.listener()
     async def on_message(self, context: Context):
         """Called each time there is a message in a server.
 
@@ -50,7 +67,7 @@ class MyBot(Cog):
         Useful to catch an unknown command for example.
         """
         if isinstance(error, discord.ext.commands.errors.CommandNotFound):
-            await context.send('Unknown command, type `!help` to get the list of all commands.')
+            await context.send(f'Unknown command, type `{self.bot.command_prefix}help` to get the list of all commands.')
             return
 
         # Raise other errors
@@ -60,7 +77,7 @@ class MyBot(Cog):
     async def example_any_arg(self,
             context: Context,
             *,
-            answer,  # Captures all args in the answer variable
+            answer: Optional[str],  # Captures all args in the answer variable
         ):
         """This command accepts any arguments as input.
 
@@ -72,7 +89,6 @@ class MyBot(Cog):
         `!command1`
         `!command1 Anything you want`
         """
-
         if answer:
             await context.reply(answer)
             return
